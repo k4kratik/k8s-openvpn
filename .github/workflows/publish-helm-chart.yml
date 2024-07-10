@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
     branches:
-      - main
+      - *
 
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
 
     - name: Package Helm Chart
       run: |
-        helm package ./openvpn
+        helm package ./deploy/openvpn
         helm repo index . --url https://starlords-eu.github.io/k8s-openvpn 
 
     - name: Setup Git
