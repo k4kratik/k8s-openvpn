@@ -1,0 +1,44 @@
+name: Publish Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Helm
+      run: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+
+    - name: Package Helm Chart
+      run: |
+        helm package ./openvpn
+        helm repo index . --url https://starlords-eu.github.io/k8s-openvpn 
+
+    - name: Setup Git
+      run: |
+        git config --global user.email "workflows@starlords.eu"
+        git config --global user.name "gh workflows"
+
+    - name: Commit and Push to gh-pages
+      run: |
+        git checkout --orphan gh-pages
+        git reset --hard
+        git add ./*.tgz
+        git add ./index.yaml
+        git commit -m "Publish Helm chart"
+        git push --force --set-upstream origin gh-pages
+
+    - name: Cleanup
+      run: |
+        git checkout main
+
